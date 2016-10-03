@@ -1,148 +1,165 @@
-export interface VNodeData {
-  // modules - use any because Object type is useless
-  props?: any;
-  attrs?: any;
-  class?: any;
-  style?: any;
-  dataset?: any;
-  on?: any;
-  hero?: any;
-  // end of modules
-  hook?: Hooks;
-  key?: string | number;
-  ns?: string; // for SVGs
-  fn?: () => VNode; // for thunks
-  args?: Array<any>; // for thunks
-}
+declare namespace snabbdom {
 
-export interface VNode {
-  sel: string;
-  data?: VNodeData;
-  children?: Array<VNode | string>;
-  elm?: Element | Text;
-  text?: string;
-  key?: string | number;
-}
+  interface VNodeData {
+    // modules - use any because Object type is useless
+    props?: any;
+    attrs?: any;
+    class?: any;
+    style?: any;
+    dataset?: any;
+    on?: any;
+    hero?: any;
+    // end of modules
+    hook?: Hooks;
+    key?: string | number;
+    ns?: string; // for SVGs
+    fn?: () => VNode; // for thunks
+    args?: Array<any>; // for thunks
+  }
 
-export interface ThunkData extends VNodeData {
-  fn: () => VNode;
-  args: Array<any>;
-}
+  interface VNode {
+    sel: string;
+    data?: VNodeData;
+    children?: Array<VNode | string>;
+    elm?: Element | Text;
+    text?: string;
+    key?: string | number;
+  }
 
-export interface Thunk extends VNode {
-  data: ThunkData;
-}
+  interface ThunkData extends VNodeData {
+    fn: () => VNode;
+    args: Array<any>;
+  }
 
-export type PreHook = () => any;
-export type InitHook = (vNode: VNode) => any;
-export type CreateHook = (emptyVNode: VNode, vNode: VNode) => any;
-export type InsertHook = (vNode: VNode) => any;
-export type PrePatchHook = (oldVNode: VNode, vNode: VNode) => any;
-export type UpdateHook = (oldVNode: VNode, vNode: VNode) => any;
-export type PostPatchHook = (oldVNode: VNode, vNode: VNode) => any;
-export type DestroyHook = (vNode: VNode) => any;
-export type RemoveHook = (vNode: VNode, removeCallback: () => void) => any;
-export type PostHook = () => any;
+  interface Thunk extends VNode {
+    data: ThunkData;
+  }
 
-export interface Hooks {
-  pre?: PreHook;
-  init?: InitHook;
-  create?: CreateHook;
-  insert?: InsertHook;
-  prepatch?: PrePatchHook;
-  update?: UpdateHook;
-  postpatch?: PostPatchHook;
-  destroy?: DestroyHook;
-  remove?: RemoveHook;
-  post?: PostHook;
-}
+  type PreHook = () => any;
+  type InitHook = (vNode: VNode) => any;
+  type CreateHook = (emptyVNode: VNode, vNode: VNode) => any;
+  type InsertHook = (vNode: VNode) => any;
+  type PrePatchHook = (oldVNode: VNode, vNode: VNode) => any;
+  type UpdateHook = (oldVNode: VNode, vNode: VNode) => any;
+  type PostPatchHook = (oldVNode: VNode, vNode: VNode) => any;
+  type DestroyHook = (vNode: VNode) => any;
+  type RemoveHook = (vNode: VNode, removeCallback: () => void) => any;
+  type PostHook = () => any;
 
-export interface Module {
-  pre?: PreHook;
-  create?: CreateHook;
-  update?: UpdateHook;
-  destroy?: DestroyHook;
-  remove?: RemoveHook;
-  post?: PostHook;
-}
+  interface Hooks {
+    pre?: PreHook;
+    init?: InitHook;
+    create?: CreateHook;
+    insert?: InsertHook;
+    prepatch?: PrePatchHook;
+    update?: UpdateHook;
+    postpatch?: PostPatchHook;
+    destroy?: DestroyHook;
+    remove?: RemoveHook;
+    post?: PostHook;
+  }
 
-export interface SnabbdomAPI<T> {
-  createElement(tagName: string): T;
-  createElementNS(namespaceURI: string, qualifiedName: string): T;
-  createTextNode(text: string): T;
-  insertBefore(parentNode: T, newNode: T, referenceNode: T): void;
-  removeChild(node: T, child: T): void;
-  appendChild(node: T, child: T): void;
-  parentNode(node: T): T;
-  nextSibling(node: T): T;
-  tagName(node: T): string;
-  setTextContent(node: T, text: string): void;
+  interface Module {
+    pre?: PreHook;
+    create?: CreateHook;
+    update?: UpdateHook;
+    destroy?: DestroyHook;
+    remove?: RemoveHook;
+    post?: PostHook;
+  }
+
+  interface SnabbdomAPI<T> {
+    createElement(tagName: string): T;
+    createElementNS(namespaceURI: string, qualifiedName: string): T;
+    createTextNode(text: string): T;
+    insertBefore(parentNode: T, newNode: T, referenceNode: T): void;
+    removeChild(node: T, child: T): void;
+    appendChild(node: T, child: T): void;
+    parentNode(node: T): T;
+    nextSibling(node: T): T;
+    tagName(node: T): string;
+    setTextContent(node: T, text: string): void;
+  }
+
+  interface PatchFunction {
+    (oldVNode: VNode | Element, vnode: VNode): VNode;
+  }
+
+  function init(modules: Object, api?: SnabbdomAPI<any>): PatchFunction;
+
+  function thunk(sel: string,
+                key: string,
+                render: (...state: Array<any>) => VNode,
+                ...state: Array<any>): Thunk;
+
+  function array(x: any): boolean;
+  function primitive(x: any): boolean;
+
+  function h(tagName: string, properties: VNodeData, children: string | Array<VNode | string>): VNode;
+  function h(tagName: string, children: string | Array<VNode | string>): VNode;
 }
 
 declare module "snabbdom" {
-  export interface PatchFunction {
-    (oldVNode: VNode, vnode: VNode): VNode;
-  }
+  export = snabbdom;
+}
 
-  export function init(modules: Object, api?: SnabbdomAPI<any>): PatchFunction;
+declare module "snabbdom/h" {
+  import h = snabbdom.h;
+  export = h;
 }
 
 declare module "snabbdom/vnode" {
-  export default function vnode(sel: string,
-                                data: VNodeData,
-                                children: Array<VNode | string>,
-                                text: string,
-                                elm: any): VNode;
+  import VNode = snabbdom.VNode;
+  export = VNode;
 }
 
 declare module "snabbdom/is" {
-  export function array(x: any): boolean;
-  export function primitive(x: any): boolean;
+   import array = snabbdom.array;
+   import primitive = snabbdom.primitive;
+   export = { array, primitive };
 }
 
 declare module "snabbdom/thunk" {
-  export default function thunk(sel: string,
-                                key: string,
-                                render: (...state: Array<any>) => VNode,
-                                ...state: Array<any>): Thunk;
+    import thunk = snabbdom.thunk;
+    export = thunk;
 }
 
 declare module "snabbdom/htmldomapi" {
-  let api: SnabbdomAPI<Element>;
+  let api: snabbdom.SnabbdomAPI<Element>;
   export = api;
 }
 
 declare module "snabbdom/modules/class" {
-  let ClassModule: Module;
+  let ClassModule: snabbdom.Module;
   export = ClassModule;
 }
 
 declare module "snabbdom/modules/props" {
-  let PropsModule: Module;
+  let PropsModule: snabbdom.Module;
   export = PropsModule;
 }
 
 declare module "snabbdom/modules/attributes" {
-  let AttrsModule: Module;
+  let AttrsModule: snabbdom.Module;
   export = AttrsModule;
 }
 
 declare module "snabbdom/modules/eventlisteners" {
-  let EventsModule: Module;
+  let EventsModule: snabbdom.Module;
   export = EventsModule;
 }
 
 declare module "snabbdom/modules/hero" {
-  let HeroModule: Module;
+  let HeroModule: snabbdom.Module;
   export = HeroModule;
 }
 
 declare module "snabbdom/modules/style" {
-  let StyleModule: Module;
+  let StyleModule: snabbdom.Module;
   export = StyleModule;
 }
 
 declare module "snabbdom/modules/dataset" {
-  let DatasetModule: Module;
+  let DatasetModule: snabbdom.Module;
   export = DatasetModule;
 }
